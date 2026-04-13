@@ -12,8 +12,8 @@
 | Project | Skills | Live |
 |---------|--------|------|
 | [Stock Portfolio Analyzer](./stock-portfolio-analyzer.html) | Python, pandas, numpy, SQL | [▶ Open](file:///Users/sherzod19/Downloads/stock-portfolio-analyzer.html) |
-| [DCF Valuation Model](./dcf-valuation-model.html) | Excel NPV/IRR, numpy_financial, SQL | [▶ Open](https://YOUR-USERNAME.github.io/financial-analytics-portfolio/dcf-valuation-model.html) |
-| [Financial Audit Dashboard](./financial-audit-dashboard.html) | SQL anomaly detection, scipy, pandas | [▶ Open](https://YOUR-USERNAME.github.io/financial-analytics-portfolio/financial-audit-dashboard.html) |
+| [DCF Valuation Model](./dcf-valuation-model.html) | Excel NPV/IRR, numpy_financial, SQL | [▶ Open](https://Sherzod19s.github.io/financial-analytics-portfolio/dcf-valuation-model.html) |
+| [Financial Audit Dashboard](./financial-audit-dashboard.html) | SQL anomaly detection, scipy, pandas | [▶ Open](https://Sherzod19s.github.io/financial-analytics-portfolio/financial-audit-dashboard.html) |
 
 ---
 
