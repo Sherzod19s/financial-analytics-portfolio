@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Financial Audit Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300..700&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+:root,[data-theme="light"]{
+  --color-bg:#f7f6f2;--color-surface:#f9f8f5;--color-surface-2:#fbfbf9;
+  --color-surface-offset:#f3f0ec;--color-surface-dynamic:#e6e4df;
+  --color-divider:#dcd9d5;--color-border:#d4d1ca;
+  --color-text:#28251d;--color-text-muted:#7a7974;--color-text-faint:#bab9b4;
+  --color-primary:#01696f;--color-primary-hover:#0c4e54;--color-primary-highlight:#cedcd8;
+  --color-success:#437a22;--color-success-highlight:#d4dfcc;
+  --color-error:#a12c7b;--color-error-highlight:#e0ced7;
+  --color-warning:#964219;--color-warning-highlight:#ddcfc6;
+  --color-gold:#d19900;--color-gold-highlight:#e9e0c6;
+  --color-blue:#006494;--color-blue-highlight:#c6d8e4;
+  --color-orange:#da7101;--color-orange-highlight:#e7d7c4;
+  --radius-sm:.375rem;--radius-md:.5rem;--radius-lg:.75rem;--radius-xl:1rem;--radius-full:9999px;
+  --shadow-sm:0 1px 2px oklch(0.2 0.01 80/0.06);--shadow-md:0 4px 12px oklch(0.2 0.01 80/0.08);
+  --transition-interactive:180ms cubic-bezier(0.16,1,0.3,1);
+  --font-body:'Inter',sans-serif;--font-display:'Instrument Serif',Georgia,serif;
+  --text-xs:clamp(0.75rem,0.7rem + 0.25vw,0.875rem);
+  --text-sm:clamp(0.875rem,0.8rem + 0.35vw,1rem);
+  --text-base:clamp(1rem,0.95rem + 0.25vw,1.125rem);
+  --text-lg:clamp(1.125rem,1rem + 0.75vw,1.5rem);
+  --text-xl:clamp(1.5rem,1.2rem + 1.25vw,2.25rem);
+  --space-1:.25rem;--space-2:.5rem;--space-3:.75rem;--space-4:1rem;
+  --space-5:1.25rem;--space-6:1.5rem;--space-8:2rem;--space-10:2.5rem;--space-12:3rem;
+  --content-wide:1200px;
+}
+[data-theme="dark"]{
+  --color-bg:#171614;--color-surface:#1c1b19;--color-surface-2:#201f1d;
+  --color-surface-offset:#1d1c1a;--color-surface-dynamic:#2d2c2a;
+  --color-divider:#262523;--color-border:#393836;
+  --color-text:#cdccca;--color-text-muted:#797876;--color-text-faint:#5a5957;
+  --color-primary:#4f98a3;--color-primary-hover:#227f8b;--color-primary-highlight:#313b3b;
+  --color-success:#6daa45;--color-success-highlight:#3a4435;
+  --color-error:#d163a7;--color-error-highlight:#4c3d46;
+  --color-warning:#bb653b;--color-warning-highlight:#564942;
+  --color-gold:#e8af34;--color-gold-highlight:#4d4332;
+  --color-blue:#5591c7;--color-blue-highlight:#3a4550;
+  --color-orange:#fdab43;--color-orange-highlight:#564b3e;
+  --shadow-sm:0 1px 2px oklch(0 0 0/0.2);--shadow-md:0 4px 12px oklch(0 0 0/0.3);
+}
+@media(prefers-color-scheme:dark){:root:not([data-theme]){
+  --color-bg:#171614;--color-surface:#1c1b19;--color-surface-2:#201f1d;
+  --color-surface-offset:#1d1c1a;--color-divider:#262523;--color-border:#393836;
+  --color-text:#cdccca;--color-text-muted:#797876;--color-text-faint:#5a5957;
+  --color-primary:#4f98a3;--color-primary-hover:#227f8b;--color-primary-highlight:#313b3b;
+  --color-success:#6daa45;--color-success-highlight:#3a4435;
+  --color-error:#d163a7;--color-error-highlight:#4c3d46;
+  --color-warning:#bb653b;--color-warning-highlight:#564942;
+  --color-gold:#e8af34;--color-gold-highlight:#4d4332;
+  --color-blue:#5591c7;--color-blue-highlight:#3a4550;
+  --color-orange:#fdab43;--color-orange-highlight:#564b3e;
+  --shadow-sm:0 1px 2px oklch(0 0 0/0.2);
+}}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-font-smoothing:antialiased;scroll-behavior:smooth}
+body{min-height:100dvh;font-family:var(--font-body);font-size:var(--text-base);color:var(--color-text);background:var(--color-bg);line-height:1.6}
+button{cursor:pointer;background:none;border:none;font:inherit;color:inherit;transition:all var(--transition-interactive)}
+table{border-collapse:collapse;width:100%}
+
+/* LAYOUT */
+.app{display:grid;grid-template-rows:auto 1fr;min-height:100dvh}
+header{position:sticky;top:0;z-index:100;background:var(--color-surface);border-bottom:1px solid var(--color-border);padding:var(--space-3) var(--space-6)}
+.header-inner{max-width:var(--content-wide);margin-inline:auto;display:flex;align-items:center;justify-content:space-between;gap:var(--space-4)}
+.logo{display:flex;align-items:center;gap:var(--space-2);text-decoration:none;color:var(--color-text)}
+.logo-text{font-family:var(--font-display);font-size:var(--text-lg);font-style:italic}
+.logo-badge{font-size:var(--text-xs);background:var(--color-blue-highlight);color:var(--color-blue);padding:2px var(--space-2);border-radius:var(--radius-full);font-weight:600}
+.header-right{display:flex;align-items:center;gap:var(--space-3)}
+.audit-period{font-size:var(--text-xs);color:var(--color-text-muted);background:var(--color-surface-offset);padding:var(--space-1) var(--space-3);border-radius:var(--radius-full)}
+.btn-icon{width:36px;height:36px;display:flex;align-items:center;justify-content:center;border-radius:var(--radius-md);color:var(--color-text-muted)}
+.btn-icon:hover{background:var(--color-surface-offset);color:var(--color-text)}
+
+main{max-width:var(--content-wide);margin-inline:auto;padding:var(--space-8) var(--space-6);width:100%}
+.page-header{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:var(--space-8);flex-wrap:wrap;gap:var(--space-4)}
+.page-title{font-family:var(--font-display);font-size:var(--text-xl);font-style:italic}
+.page-sub{font-size:var(--text-sm);color:var(--color-text-muted);margin-top:var(--space-1)}
+
+/* TABS */
+.tabs{display:flex;gap:var(--space-1);background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-lg);padding:var(--space-1)}
+.tab{padding:var(--space-2) var(--space-4);border-radius:var(--radius-md);font-size:var(--text-sm);font-weight:500;color:var(--color-text-muted)}
+.tab.active{background:var(--color-primary);color:#fff}
+.tab:hover:not(.active){background:var(--color-surface-offset);color:var(--color-text)}
+.tab-panel{display:none}.tab-panel.active{display:block}
+
+/* CARDS */
+.card{background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-lg);padding:var(--space-6);box-shadow:var(--shadow-sm)}
+.card-title{font-size:var(--text-base);font-weight:700;margin-bottom:var(--space-4)}
+
+/* KPI GRID */
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(180px,100%),1fr));gap:var(--space-4);margin-bottom:var(--space-6)}
+.kpi-card{background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-lg);padding:var(--space-5);box-shadow:var(--shadow-sm);position:relative;overflow:hidden}
+.kpi-card::before{content:'';position:absolute;top:0;left:0;width:3px;height:100%;border-radius:var(--radius-sm) 0 0 var(--radius-sm)}
+.kpi-card.ok::before{background:var(--color-success)}.kpi-card.warn::before{background:var(--color-warning)}.kpi-card.bad::before{background:var(--color-error)}.kpi-card.info::before{background:var(--color-blue)}
+.kpi-label{font-size:var(--text-xs);color:var(--color-text-muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:var(--space-2)}
+.kpi-value{font-size:var(--text-xl);font-family:var(--font-display);font-weight:600;line-height:1.1;font-variant-numeric:tabular-nums}
+.kpi-status{font-size:var(--text-xs);margin-top:var(--space-1)}
+.ok-text{color:var(--color-success)}.warn-text{color:var(--color-warning)}.bad-text{color:var(--color-error)}.info-text{color:var(--color-blue)}
+
+/* ALERT ITEMS */
+.alert-list{display:flex;flex-direction:column;gap:var(--space-3);margin-top:var(--space-4)}
+.alert-item{display:flex;gap:var(--space-3);padding:var(--space-4);border-radius:var(--radius-md);border:1px solid}
+.alert-item.critical{background:var(--color-error-highlight);border-color:oklch(from var(--color-error) l c h/0.3)}
+.alert-item.warning{background:var(--color-warning-highlight);border-color:oklch(from var(--color-warning) l c h/0.3)}
+.alert-item.info{background:var(--color-blue-highlight);border-color:oklch(from var(--color-blue) l c h/0.3)}
+.alert-icon{width:20px;height:20px;flex-shrink:0;margin-top:2px}
+.alert-body{}
+.alert-title{font-size:var(--text-sm);font-weight:700;margin-bottom:var(--space-1)}
+.alert-desc{font-size:var(--text-xs);color:var(--color-text-muted);max-width:65ch}
+.alert-meta{font-size:var(--text-xs);margin-top:var(--space-2);display:flex;gap:var(--space-3)}
+.badge{display:inline-flex;align-items:center;padding:2px var(--space-2);border-radius:var(--radius-full);font-size:var(--text-xs);font-weight:600}
+.badge-crit{background:var(--color-error-highlight);color:var(--color-error)}
+.badge-warn{background:var(--color-warning-highlight);color:var(--color-warning)}
+.badge-ok{background:var(--color-success-highlight);color:var(--color-success)}
+.badge-info{background:var(--color-blue-highlight);color:var(--color-blue)}
+
+/* TABLES */
+.data-table{font-size:var(--text-sm);font-variant-numeric:tabular-nums}
+.data-table th{text-align:left;font-size:var(--text-xs);text-transform:uppercase;letter-spacing:.06em;color:var(--color-text-muted);padding:var(--space-3) var(--space-4);border-bottom:1px solid var(--color-border);font-weight:600}
+.data-table td{padding:var(--space-3) var(--space-4);border-bottom:1px solid var(--color-divider);color:var(--color-text)}
+.data-table tr:last-child td{border-bottom:none}
+.data-table tr:hover td{background:var(--color-surface-offset)}
+.td-right{text-align:right}
+.variance-bar{height:5px;border-radius:var(--radius-full);display:inline-block;vertical-align:middle;margin-left:var(--space-2)}
+
+/* GRID LAYOUTS */
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:var(--space-6);margin-bottom:var(--space-6)}
+@media(max-width:768px){.two-col{grid-template-columns:1fr}}
+.three-col{display:grid;grid-template-columns:1fr 1fr 1fr;gap:var(--space-6);margin-bottom:var(--space-6)}
+@media(max-width:900px){.three-col{grid-template-columns:1fr 1fr}}
+@media(max-width:580px){.three-col{grid-template-columns:1fr}}
+
+/* RATIO TABLE */
+.ratio-section{margin-bottom:var(--space-6)}
+.ratio-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:var(--space-4)}
+.ratio-card{background:var(--color-surface-offset);border-radius:var(--radius-md);padding:var(--space-4)}
+.ratio-name{font-size:var(--text-xs);color:var(--color-text-muted);margin-bottom:var(--space-1);text-transform:uppercase;letter-spacing:.05em}
+.ratio-val{font-size:var(--text-lg);font-weight:700;font-variant-numeric:tabular-nums;margin-bottom:var(--space-1)}
+.ratio-bench{font-size:var(--text-xs);color:var(--color-text-faint)}
+.ratio-bar-wrap{height:4px;background:var(--color-divider);border-radius:var(--radius-full);margin-top:var(--space-2)}
+.ratio-bar-fill{height:100%;border-radius:var(--radius-full);transition:width .8s cubic-bezier(0.16,1,0.3,1)}
+
+footer{border-top:1px solid var(--color-border);padding:var(--space-6);text-align:center;font-size:var(--text-xs);color:var(--color-text-faint)}
+</style>
+</head>
+<body>
+<div class="app">
+<header>
+  <div class="header-inner">
+    <a href="#" class="logo">
+      <svg width="28" height="28" viewBox="0 0 28 28" fill="none" aria-label="Audit Dashboard logo">
+        <rect width="28" height="28" rx="6" fill="var(--color-blue)"/>
+        <path d="M7 14 L11 18 L21 9" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+        <circle cx="14" cy="14" r="7" stroke="white" stroke-width="1.5" fill="none"/>
+      </svg>
+      <span class="logo-text">AuditLens</span>
+      <span class="logo-badge">Audit Analytics</span>
+    </a>
+    <div class="header-right">
+      <span class="audit-period">FY 2024 · Q1–Q4</span>
+      <button class="btn-icon" data-theme-toggle aria-label="Toggle theme">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+      </button>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">Financial Audit Dashboard</h1>
+      <p class="page-sub">GlobalRetail Corp · Annual Financial Review · Data Analytics & Risk Flagging</p>
+    </div>
+    <div class="tabs">
+      <button class="tab active" onclick="switchTab('overview',this)">Overview</button>
+      <button class="tab" onclick="switchTab('pnl',this)">P&amp;L Analysis</button>
+      <button class="tab" onclick="switchTab('ratios',this)">Ratios</button>
+      <button class="tab" onclick="switchTab('anomalies',this)">Anomalies</button>
+    </div>
+  </div>
+
+  <!-- OVERVIEW TAB -->
+  <div class="tab-panel active" id="tab-overview">
+    <div class="kpi-grid">
+      <div class="kpi-card ok"><div class="kpi-label">Revenue</div><div class="kpi-value">$4.82B</div><div class="kpi-status ok-text">▲ +8.3% YoY — On Target</div></div>
+      <div class="kpi-card warn"><div class="kpi-label">Gross Margin</div><div class="kpi-value">41.2%</div><div class="kpi-status warn-text">▼ −1.4pp vs FY23 — Watch</div></div>
+      <div class="kpi-card ok"><div class="kpi-label">EBITDA</div><div class="kpi-value">$612M</div><div class="kpi-status ok-text">▲ +5.1% YoY — Healthy</div></div>
+      <div class="kpi-card bad"><div class="kpi-label">Cash Burn Q3</div><div class="kpi-value">−$88M</div><div class="kpi-status bad-text">⚠ Anomaly detected</div></div>
+      <div class="kpi-card info"><div class="kpi-label">Current Ratio</div><div class="kpi-value">1.83x</div><div class="kpi-status info-text">Within normal range</div></div>
+      <div class="kpi-card warn"><div class="kpi-label">A/R Days</div><div class="kpi-value">48.5</div><div class="kpi-status warn-text">▲ +6d vs prior year</div></div>
+      <div class="kpi-card ok"><div class="kpi-label">Debt/Equity</div><div class="kpi-value">0.62x</div><div class="kpi-status ok-text">Conservative leverage</div></div>
+      <div class="kpi-card bad"><div class="kpi-label">Audit Flags</div><div class="kpi-value">7</div><div class="kpi-status bad-text">3 critical · 4 warnings</div></div>
+    </div>
+
+    <div class="two-col">
+      <div class="card">
+        <div class="card-title">Revenue vs. Budget — Quarterly</div>
+        <canvas id="chart-rev" height="200"></canvas>
+      </div>
+      <div class="card">
+        <div class="card-title">Operating Expense Breakdown</div>
+        <canvas id="chart-opex" height="200"></canvas>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Cash Flow Bridge: Q1–Q4</div>
+      <canvas id="chart-cf" height="140"></canvas>
+    </div>
+  </div>
+
+  <!-- P&L TAB -->
+  <div class="tab-panel" id="tab-pnl">
+    <div class="card" style="margin-bottom:var(--space-6)">
+      <div class="card-title">Income Statement — FY2024 vs FY2023 (USD M)</div>
+      <div style="overflow-x:auto">
+      <table class="data-table" id="pnl-table">
+        <thead><tr>
+          <th>Line Item</th><th class="td-right">FY2024</th><th class="td-right">FY2023</th>
+          <th class="td-right">Variance $</th><th class="td-right">Variance %</th><th>Status</th>
+        </tr></thead>
+        <tbody id="pnl-body"></tbody>
+      </table>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">Margin Trend — 5 Year View</div>
+      <canvas id="chart-margin" height="160"></canvas>
+    </div>
+  </div>
+
+  <!-- RATIOS TAB -->
+  <div class="tab-panel" id="tab-ratios">
+    <div class="ratio-section">
+      <div class="card-title" style="margin-bottom:var(--space-4)">Liquidity Ratios</div>
+      <div class="ratio-grid" id="ratio-liquidity"></div>
+    </div>
+    <div class="ratio-section">
+      <div class="card-title" style="margin-bottom:var(--space-4)">Profitability Ratios</div>
+      <div class="ratio-grid" id="ratio-profit"></div>
+    </div>
+    <div class="ratio-section">
+      <div class="card-title" style="margin-bottom:var(--space-4)">Efficiency Ratios</div>
+      <div class="ratio-grid" id="ratio-efficiency"></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Ratio Radar — FY2024 vs Industry Benchmark</div>
+      <canvas id="chart-radar" height="300"></canvas>
+    </div>
+  </div>
+
+  <!-- ANOMALIES TAB -->
+  <div class="tab-panel" id="tab-anomalies">
+    <div class="card" style="margin-bottom:var(--space-6)">
+      <div class="card-title">Audit Flags &amp; Anomaly Log</div>
+      <p style="font-size:var(--text-sm);color:var(--color-text-muted);margin-bottom:var(--space-4)">Automated anomaly detection using Z-score analysis, Benford's Law, and trend deviation rules on transactional data.</p>
+      <div class="alert-list" id="alert-list"></div>
+    </div>
+    <div class="two-col">
+      <div class="card">
+        <div class="card-title">Benford's Law — First Digit Distribution</div>
+        <canvas id="chart-benford" height="200"></canvas>
+      </div>
+      <div class="card">
+        <div class="card-title">Z-Score Outlier Detection — Revenue Transactions</div>
+        <canvas id="chart-zscore" height="200"></canvas>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">SQL Query Used — Anomaly Detection Logic</div>
+      <div style="background:var(--color-surface-offset);border-radius:var(--radius-md);padding:var(--space-5);font-family:monospace;font-size:var(--text-xs);color:var(--color-text-muted);line-height:2;overflow-x:auto;margin-top:var(--space-4)">
+        <span style="color:var(--color-blue)">-- Benford's Law first-digit distribution check</span><br>
+        <span style="color:var(--color-primary)">SELECT</span><br>
+        &nbsp;&nbsp;SUBSTR(CAST(ABS(amount) AS TEXT), 1, 1) AS first_digit,<br>
+        &nbsp;&nbsp;COUNT(*) AS actual_count,<br>
+        &nbsp;&nbsp;COUNT(*) * 100.0 / SUM(COUNT(*)) OVER() AS actual_pct,<br>
+        &nbsp;&nbsp;LOG10(1 + 1.0/CAST(SUBSTR(CAST(ABS(amount) AS TEXT),1,1) AS FLOAT))*100 AS benford_pct,<br>
+        &nbsp;&nbsp;ABS(COUNT(*)*100.0/SUM(COUNT(*))OVER() - LOG10(1+1.0/CAST(SUBSTR(CAST(ABS(amount) AS TEXT),1,1) AS FLOAT))*100) AS deviation<br>
+        <span style="color:var(--color-primary)">FROM</span> transactions<br>
+        <span style="color:var(--color-primary)">WHERE</span> transaction_date BETWEEN '2024-01-01' AND '2024-12-31'<br>
+        &nbsp;&nbsp;<span style="color:var(--color-primary)">AND</span> amount > 0<br>
+        <span style="color:var(--color-primary)">GROUP BY</span> first_digit<br>
+        <span style="color:var(--color-primary)">HAVING</span> deviation > 5.0<br>
+        <span style="color:var(--color-primary)">ORDER BY</span> first_digit;
+      </div>
+    </div>
+  </div>
+</main>
+<footer>AuditLens · Financial Audit Analytics Dashboard · Portfolio Project · Tools: Excel (pivot tables, variance analysis) · Python (pandas, scipy stats) · SQL (anomaly detection, aggregation)</footer>
+</div>
+
+<script>
+// === TAB SWITCHING ===
+function switchTab(id,btn){
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('tab-'+id).classList.add('active');
+  btn.classList.add('active');
+}
+
+function getTC(){
+  const s=getComputedStyle(document.documentElement);
+  return{text:s.getPropertyValue('--color-text').trim(),muted:s.getPropertyValue('--color-text-muted').trim(),divider:s.getPropertyValue('--color-divider').trim(),surface:s.getPropertyValue('--color-surface').trim()};
+}
+
+// === P&L DATA ===
+const pnlData=[
+  {item:'Revenue',fy24:4820,fy23:4450},
+  {item:'Cost of Revenue',fy24:2834,fy23:2580},
+  {item:'Gross Profit',fy24:1986,fy23:1870,bold:true},
+  {item:'R&D Expense',fy24:310,fy23:290},
+  {item:'S&M Expense',fy24:485,fy23:440},
+  {item:'G&A Expense',fy24:198,fy23:185},
+  {item:'Total OpEx',fy24:993,fy23:915,bold:true},
+  {item:'EBIT',fy24:993,fy23:955,bold:true},
+  {item:'Interest Expense',fy24:48,fy23:42},
+  {item:'EBT',fy24:945,fy23:913},
+  {item:'Income Tax',fy24:198,fy23:191},
+  {item:'Net Income',fy24:747,fy23:722,bold:true},
+];
+function renderPnL(){
+  document.getElementById('pnl-body').innerHTML=pnlData.map(r=>{
+    const varD=r.fy24-r.fy23;const varP=(varD/r.fy23*100);
+    const status=Math.abs(varP)>10?'<span class="badge badge-crit">Flag</span>':Math.abs(varP)>5?'<span class="badge badge-warn">Watch</span>':'<span class="badge badge-ok">Normal</span>';
+    const barColor=varD>=0?'var(--color-success)':'var(--color-error)';
+    const barW=Math.min(60,Math.abs(varP)*2);
+    return`<tr style="${r.bold?'font-weight:700;background:var(--color-surface-offset)':''}">
+      <td>${r.item}</td>
+      <td class="td-right">$${r.fy24}M</td>
+      <td class="td-right">$${r.fy23}M</td>
+      <td class="td-right ${varD>=0?'ok-text':'bad-text'}">${varD>=0?'+':'-'}$${Math.abs(varD)}M</td>
+      <td class="td-right ${varD>=0?'ok-text':'bad-text'}">${varD>=0?'+':''}${varP.toFixed(1)}%<span class="variance-bar" style="width:${barW}px;background:${barColor}"></span></td>
+      <td>${status}</td>
+    </tr>`;
+  }).join('');
+}
+
+// === RATIOS ===
+function renderRatios(){
+  const liquidity=[
+    {name:'Current Ratio',val:1.83,unit:'x',bench:'> 1.5x',color:'#437a22',pct:73},
+    {name:'Quick Ratio',val:1.12,unit:'x',bench:'> 1.0x',color:'#437a22',pct:56},
+    {name:'Cash Ratio',val:0.41,unit:'x',bench:'> 0.2x',color:'#437a22',pct:41},
+    {name:'Operating CF Ratio',val:0.78,unit:'x',bench:'> 0.5x',color:'#437a22',pct:78},
+  ];
+  const profit=[
+    {name:'Gross Margin',val:41.2,unit:'%',bench:'Industry: 43%',color:'#964219',pct:82},
+    {name:'EBIT Margin',val:20.6,unit:'%',bench:'Industry: 18%',color:'#437a22',pct:68},
+    {name:'Net Margin',val:15.5,unit:'%',bench:'Industry: 13%',color:'#437a22',pct:62},
+    {name:'ROE',val:18.4,unit:'%',bench:'Benchmark: 15%',color:'#437a22',pct:73},
+    {name:'ROA',val:8.9,unit:'%',bench:'Benchmark: 7%',color:'#437a22',pct:60},
+    {name:'ROIC',val:14.2,unit:'%',bench:'WACC: 9%',color:'#437a22',pct:71},
+  ];
+  const efficiency=[
+    {name:'A/R Days (DSO)',val:48.5,unit:'d',bench:'< 45d — Watch',color:'#964219',pct:65},
+    {name:'Inventory Days',val:32.1,unit:'d',bench:'< 35d',color:'#437a22',pct:46},
+    {name:'A/P Days (DPO)',val:41.2,unit:'d',bench:'30-60d',color:'#437a22',pct:55},
+    {name:'Asset Turnover',val:1.42,unit:'x',bench:'> 1.0x',color:'#437a22',pct:71},
+  ];
+  ['liquidity','profit','efficiency'].forEach(type=>{
+    const data=type==='liquidity'?liquidity:type==='profit'?profit:efficiency;
+    document.getElementById('ratio-'+type).innerHTML=data.map(r=>`
+      <div class="ratio-card">
+        <div class="ratio-name">${r.name}</div>
+        <div class="ratio-val" style="color:${r.color}">${r.val}${r.unit}</div>
+        <div class="ratio-bench">${r.bench}</div>
+        <div class="ratio-bar-wrap"><div class="ratio-bar-fill" style="width:${r.pct}%;background:${r.color}"></div></div>
+      </div>`).join('');
+  });
+}
+
+// === ANOMALIES ===
+const alerts=[
+  {level:'critical',title:'Q3 Operating Cash Outflow Spike — $88M',desc:'Cash flow from operations dropped −$88M in Q3, a 3.2σ deviation from the quarterly mean. Possible misclassification of financing activities or timing of large vendor payments. Requires management explanation.',area:'Cash Flow',period:'Q3 2024',flag:'Benford + Z-Score'},
+  {level:'critical',title:'Revenue Recognition Timing — September',desc:'September revenue is 34% above the 12-month rolling average with no corresponding increase in shipments data. Potential channel stuffing or early recognition of Q4 bookings.',area:'Revenue',period:'Sep 2024',flag:'Trend Deviation'},
+  {level:'critical',title:'A/R Increase vs. Revenue Growth Mismatch',desc:'Accounts receivable grew 22% while revenue grew only 8.3%. DSO has expanded by 6 days. Signals possible collection issues or aggressive credit terms being extended to customers.',area:'Balance Sheet',period:'FY2024',flag:'Ratio Deviation'},
+  {level:'warning',title:'Gross Margin Compression −1.4pp YoY',desc:'Gross margin fell from 42.6% to 41.2%. COGS grew 9.8% while revenue grew 8.3%. Possible input cost inflation not passed through to pricing, or product mix shift.',area:'P&L',period:'FY2024',flag:'Trend'},
+  {level:'warning',title:'G&A Expenses Q4 — Unusual Pattern',desc:'G&A in Q4 was $72M vs $43M average in Q1-Q3. The spike may indicate year-end adjustments, accrual reversals, or allocation reclassifications.',area:'OpEx',period:'Q4 2024',flag:'Z-Score'},
+  {level:'warning',title:'Benford\'s Law Deviation — Vendor Invoices',desc:'First-digit distribution of vendor invoice amounts shows statistically significant excess of "1" and "9" digits. Chi-squared test p-value: 0.031. May indicate round-number or near-threshold invoice manipulation.',area:'Payables',period:'FY2024',flag:'Benford\'s Law'},
+  {level:'info',title:'Tax Rate Increase 20.4% → 21.0%',desc:'Effective tax rate increased 60bps. Consistent with new jurisdiction mix but warrants review of deferred tax assets and permanent differences in the tax reconciliation note.',area:'Tax',period:'FY2024',flag:'Ratio Change'},
+];
+function renderAlerts(){
+  const icons={critical:`<svg class="alert-icon" viewBox="0 0 20 20" fill="none" stroke="var(--color-error)" stroke-width="1.5"><circle cx="10" cy="10" r="8"/><line x1="10" y1="6" x2="10" y2="11"/><circle cx="10" cy="14" r="1" fill="var(--color-error)"/></svg>`,
+    warning:`<svg class="alert-icon" viewBox="0 0 20 20" fill="none" stroke="var(--color-warning)" stroke-width="1.5"><path d="M10 3 L18 17 H2 Z"/><line x1="10" y1="9" x2="10" y2="13"/><circle cx="10" cy="15.5" r="0.8" fill="var(--color-warning)"/></svg>`,
+    info:`<svg class="alert-icon" viewBox="0 0 20 20" fill="none" stroke="var(--color-blue)" stroke-width="1.5"><circle cx="10" cy="10" r="8"/><line x1="10" y1="9" x2="10" y2="14"/><circle cx="10" cy="6.5" r="0.8" fill="var(--color-blue)"/></svg>`};
+  const badge={critical:'badge-crit',warning:'badge-warn',info:'badge-info'};
+  document.getElementById('alert-list').innerHTML=alerts.map(a=>`
+    <div class="alert-item ${a.level}">
+      ${icons[a.level]}
+      <div class="alert-body">
+        <div class="alert-title">${a.title}</div>
+        <div class="alert-desc">${a.desc}</div>
+        <div class="alert-meta">
+          <span class="badge ${badge[a.level]}">${a.level.toUpperCase()}</span>
+          <span class="badge badge-info">${a.area}</span>
+          <span style="font-size:var(--text-xs);color:var(--color-text-faint)">${a.period} · ${a.flag}</span>
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+// === CHARTS ===
+let charts={};
+function initCharts(){
+  const tc=getTC();
+  // Revenue vs Budget
+  charts.rev=new Chart(document.getElementById('chart-rev'),{type:'bar',data:{
+    labels:['Q1','Q2','Q3','Q4'],
+    datasets:[
+      {label:'Actual',data:[1120,1180,1180,1340],backgroundColor:'#01696f',borderRadius:4},
+      {label:'Budget',data:[1100,1200,1250,1300],backgroundColor:'transparent',borderColor:'#006494',borderWidth:2,type:'line',tension:0.3,pointRadius:4}
+    ]
+  },options:{responsive:true,plugins:{legend:{labels:{color:tc.text,font:{size:11}}}},scales:{x:{grid:{color:tc.divider},ticks:{color:tc.muted}},y:{grid:{color:tc.divider},ticks:{color:tc.muted,callback:v=>'$'+v+'M'}}}}});
+
+  // OpEx doughnut
+  charts.opex=new Chart(document.getElementById('chart-opex'),{type:'doughnut',data:{
+    labels:['COGS','R&D','S&M','G&A'],
+    datasets:[{data:[2834,310,485,198],backgroundColor:['#01696f','#006494','#437a22','#d19900'],borderWidth:2,borderColor:tc.surface}]
+  },options:{responsive:true,cutout:'60%',plugins:{legend:{position:'bottom',labels:{color:tc.text,font:{size:11},boxWidth:12}}}}});
+
+  // Cash flow line
+  charts.cf=new Chart(document.getElementById('chart-cf'),{type:'bar',data:{
+    labels:['Q1 Operating','Q1 Investing','Q1 Financing','Q2 Operating','Q2 Investing','Q3 Operating','Q3 Anomaly','Q4 Operating'],
+    datasets:[{
+      data:[210,-45,-30,225,-80,180,-88,230],
+      backgroundColor:d=>d.raw>=0?'#437a22':'#a12c7b',
+      borderRadius:4
+    }]
+  },options:{responsive:true,plugins:{legend:{display:false}},scales:{x:{grid:{color:tc.divider},ticks:{color:tc.muted,font:{size:10}}},y:{grid:{color:tc.divider},ticks:{color:tc.muted,callback:v=>'$'+v+'M'}}}}});
+
+  // Margin trend
+  charts.margin=new Chart(document.getElementById('chart-margin'),{type:'line',data:{
+    labels:['FY2020','FY2021','FY2022','FY2023','FY2024'],
+    datasets:[
+      {label:'Gross Margin',data:[39.1,40.5,42.0,42.6,41.2],borderColor:'#01696f',backgroundColor:'rgba(1,105,111,0.1)',fill:true,tension:0.4,pointRadius:4},
+      {label:'EBIT Margin',data:[17.2,18.5,20.1,21.5,20.6],borderColor:'#006494',fill:false,tension:0.4,pointRadius:4},
+      {label:'Net Margin',data:[12.8,14.0,15.2,16.2,15.5],borderColor:'#437a22',fill:false,tension:0.4,pointRadius:4},
+    ]
+  },options:{responsive:true,plugins:{legend:{labels:{color:tc.text,font:{size:11}}}},scales:{x:{grid:{color:tc.divider},ticks:{color:tc.muted}},y:{grid:{color:tc.divider},ticks:{color:tc.muted,callback:v=>v+'%'}}}}});
+
+  // Benford's Law
+  const benfordExpected=[30.1,17.6,12.5,9.7,7.9,6.7,5.8,5.1,4.6];
+  const benfordActual=[33.2,16.1,11.8,9.1,7.5,7.9,5.2,4.8,4.4];
+  charts.benford=new Chart(document.getElementById('chart-benford'),{type:'bar',data:{
+    labels:['1','2','3','4','5','6','7','8','9'],
+    datasets:[
+      {label:'Expected (Benford)',data:benfordExpected,backgroundColor:'rgba(0,100,148,0.3)',borderColor:'#006494',borderWidth:1.5,borderRadius:3},
+      {label:'Actual',data:benfordActual,backgroundColor:'rgba(161,44,123,0.4)',borderColor:'#a12c7b',borderWidth:1.5,borderRadius:3},
+    ]
+  },options:{responsive:true,plugins:{legend:{labels:{color:tc.text,font:{size:11}}}},scales:{x:{grid:{color:tc.divider},ticks:{color:tc.muted}},y:{grid:{color:tc.divider},ticks:{color:tc.muted,callback:v=>v+'%'}}}}});
+
+  // Z-Score
+  const zscores=Array.from({length:40},(_,i)=>({x:i,y:+(Math.sin(i*0.4)*1.2+(Math.random()-0.5)*1.5).toFixed(2)}));
+  zscores[14]={x:14,y:3.8};zscores[27]={x:27,y:-3.5};
+  charts.zscore=new Chart(document.getElementById('chart-zscore'),{type:'scatter',data:{
+    datasets:[{
+      label:'Z-Score',
+      data:zscores,
+      backgroundColor:d=>Math.abs(d.raw.y)>3?'#a12c7b':'rgba(1,105,111,0.5)',
+      pointRadius:d=>Math.abs(d.raw.y)>3?7:4,
+    }]
+  },options:{responsive:true,plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>`Week ${ctx.parsed.x}: Z=${ctx.parsed.y}`}}},scales:{x:{grid:{color:tc.divider},ticks:{color:tc.muted,callback:v=>'Wk'+v}},y:{grid:{color:tc.divider},ticks:{color:tc.muted},title:{display:true,text:'Z-Score',color:tc.muted}}}}});
+
+  // Radar
+  charts.radar=new Chart(document.getElementById('chart-radar'),{type:'radar',data:{
+    labels:['Liquidity','Profitability','Efficiency','Leverage','Cash Flow','Growth'],
+    datasets:[
+      {label:'FY2024',data:[73,68,65,80,72,60],borderColor:'#01696f',backgroundColor:'rgba(1,105,111,0.15)',pointBackgroundColor:'#01696f',borderWidth:2},
+      {label:'Industry Benchmark',data:[65,62,70,65,68,55],borderColor:'#006494',backgroundColor:'rgba(0,100,148,0.1)',pointBackgroundColor:'#006494',borderWidth:1.5,borderDash:[4,4]},
+    ]
+  },options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:tc.text,font:{size:12}}}},scales:{r:{grid:{color:tc.divider},ticks:{display:false},pointLabels:{color:tc.text,font:{size:12}},angleLines:{color:tc.divider}}}}});
+}
+
+(function(){
+  const tog=document.querySelector('[data-theme-toggle]'),root=document.documentElement;
+  let d=matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light';
+  root.setAttribute('data-theme',d);
+  if(tog)tog.addEventListener('click',()=>{d=d==='dark'?'light':'dark';root.setAttribute('data-theme',d);});
+})();
+
+renderPnL();renderRatios();renderAlerts();
+setTimeout(initCharts,50);
+</script>
+</body>
+</html>
