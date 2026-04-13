@@ -1,4 +1,4 @@
-# financial-analytics-portfolio
+# Financial-analytics-portfolio
 # 📊 Financial Analytics Portfolio
 
 > Interactive finance and data analytics projects demonstrating Excel, Python, and SQL skills — built for finance, audit, and analytics roles.
